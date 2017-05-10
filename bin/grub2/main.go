@@ -76,7 +76,9 @@ func main() {
 		fmt.Println("setup mode: true")
 		g.Setup(argGfxmode)
 	} else {
-		runAsDaemon()
+		fmt.Println("daemon mode is disabled")
+		return
+		//runAsDaemon()
 	}
 }
 

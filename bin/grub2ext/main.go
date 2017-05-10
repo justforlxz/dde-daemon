@@ -35,6 +35,7 @@ var logger = log.NewLogger(grub2.DbusGrub2ExtDest + ".Runner")
 var argDebug bool
 
 func main() {
+	return
 	logger.BeginTracing()
 	defer logger.EndTracing()
 
