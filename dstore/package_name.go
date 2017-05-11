@@ -13,6 +13,8 @@ import (
 	"bufio"
 	"encoding/json"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 type DQueryPkgNameTransaction struct {
@@ -26,13 +28,54 @@ func NewDQueryPkgNameTransaction(path string) (*DQueryPkgNameTransaction, error)
 		return nil, err
 	}
 	defer f.Close()
-	t := &DQueryPkgNameTransaction{data: map[string]string{}}
+	t := new(DQueryPkgNameTransaction)
 	decoder := json.NewDecoder(bufio.NewReader(f))
-	err = decoder.Decode(&t.data)
+	var data map[string]string
+	err = decoder.Decode(&data)
 	if err != nil {
 		return nil, err
 	}
+	t.data = convertDesktopPkgMap(data)
 	return t, nil
+}
+
+func convertDesktopPkgMap(in map[string]string) map[string]string {
+	out := make(map[string]string)
+	for k, v := range in {
+		if !filepath.IsAbs(k) {
+			continue
+		}
+
+		id := getDesktopId(k)
+		if id != "" {
+			out[id] = v
+		}
+	}
+	return out
+}
+
+var appDirs = []string{
+	"/usr/share/applications",
+	"/usr/local/share/applications",
+}
+
+func getDesktopId(file string) string {
+	file = filepath.Clean(file)
+	const desktopExt = ".desktop"
+	if !strings.HasSuffix(file, desktopExt) {
+		return ""
+	}
+	var desktopId string
+	for _, dir := range appDirs {
+		if strings.HasPrefix(file, dir) {
+			desktopId, _ = filepath.Rel(dir, file)
+			break
+		}
+	}
+	if desktopId == "" {
+		return ""
+	}
+	return strings.Replace(desktopId, "/", "-", -1)
 }
 
 func (t *DQueryPkgNameTransaction) Query(desktopID string) string {

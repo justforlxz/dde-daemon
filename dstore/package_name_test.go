@@ -19,6 +19,7 @@ func TestGetPkgName(t *testing.T) {
 		t, err := NewDQueryPkgNameTransaction("testdata/package.json")
 		So(err, ShouldBeNil)
 		So(t.Query("test.desktop"), ShouldEqual, "")
+		So(t.Query("xyz.desktop"), ShouldEqual, "")
 		So(t.Query("Thunar.desktop"), ShouldEqual, "thunar")
 	})
 }
