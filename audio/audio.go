@@ -133,25 +133,30 @@ func (s *Sink) SetVolume(v float64, isPlay bool) {
 	if isPlay {
 		playFeedbackWithDevice(s.Name)
 	}
+	s.setPropVolume(v)
 }
 func (s *Sink) SetBalance(v float64, isPlay bool) {
 	s.core.SetVolume(s.core.Volume.SetBalance(s.core.ChannelMap, v))
 	if isPlay {
 		playFeedbackWithDevice(s.Name)
 	}
+	s.setPropBalance(v)
 }
 func (s *Sink) SetFade(v float64) {
 	s.core.SetVolume(s.core.Volume.SetFade(s.core.ChannelMap, v))
 	playFeedbackWithDevice(s.Name)
+	s.setPropFade(v)
 }
 func (s *Sink) SetMute(v bool) {
 	s.core.SetMute(v)
 	if !v {
 		playFeedbackWithDevice(s.Name)
 	}
+	s.setPropMute(v)
 }
 func (s *Sink) SetPort(name string) {
 	s.core.SetPort(name)
+	s.setPropActivePort(toPort(s.core.ActivePort))
 }
 
 type SinkInput struct {
@@ -224,25 +229,30 @@ func (s *Source) SetVolume(v float64, isPlay bool) {
 	if isPlay {
 		playFeedback()
 	}
+	s.setPropVolume(v)
 }
 func (s *Source) SetBalance(v float64, isPlay bool) {
 	s.core.SetVolume(s.core.Volume.SetBalance(s.core.ChannelMap, v))
 	if isPlay {
 		playFeedback()
 	}
+	s.setPropBalance(v)
 }
 func (s *Source) SetFade(v float64) {
 	s.core.SetVolume(s.core.Volume.SetFade(s.core.ChannelMap, v))
 	playFeedback()
+	s.setPropFade(v)
 }
 func (s *Source) SetMute(v bool) {
 	s.core.SetMute(v)
 	if !v {
 		playFeedback()
 	}
+	s.setPropMute(v)
 }
 func (s *Source) SetPort(name string) {
 	s.core.SetPort(name)
+	s.setPropActivePort(toPort(s.core.ActivePort))
 }
 
 var _audio *Audio
