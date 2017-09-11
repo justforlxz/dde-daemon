@@ -18,6 +18,7 @@ import (
 	_ "pkg.deepin.io/dde/daemon/system/gesture"
 	_ "pkg.deepin.io/dde/daemon/system/power"
 	_ "pkg.deepin.io/dde/daemon/system/swapsched"
+	_ "pkg.deepin.io/dde/daemon/system/timedated"
 
 	"gir/glib-2.0"
 	"pkg.deepin.io/dde/daemon/loader"
