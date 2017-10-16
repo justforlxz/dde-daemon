@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-08-15 14:20+0800\n"
+"POT-Creation-Date: 2017-12-29 12:01+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -127,23 +127,27 @@ msgstr ""
 msgid "Failed to connect %q, automatically ignored"
 msgstr ""
 
-#: ../../dock/app_entry_menu.go:99
+#: ../../dock/app_entry_menu.go:94
 msgid "_Open"
 msgstr ""
 
-#: ../../dock/app_entry_menu.go:106
+#: ../../dock/app_entry_menu.go:101
 msgid "_Close All"
 msgstr ""
 
-#: ../../dock/app_entry_menu.go:115
+#: ../../dock/app_entry_menu.go:110
+msgid "_Force Quit"
+msgstr ""
+
+#: ../../dock/app_entry_menu.go:117
 msgid "_Dock"
 msgstr ""
 
-#: ../../dock/app_entry_menu.go:122
+#: ../../dock/app_entry_menu.go:124
 msgid "_Undock"
 msgstr ""
 
-#: ../../dock/app_entry_menu.go:129
+#: ../../dock/app_entry_menu.go:131
 msgid "_All windows"
 msgstr ""
 

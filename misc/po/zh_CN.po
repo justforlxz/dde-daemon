@@ -1927,3 +1927,7 @@ msgstr "电池电量低"
 #: ../../session/power/manager_events.go:124
 msgid "Computer will be in suspend mode, please plug in now"
 msgstr "计算机将要进入待机状态，请连接电源"
+
+#: ../../dock/app_entry_menu.go:110
+msgid "_Force Quit"
+msgstr "强制退出"
