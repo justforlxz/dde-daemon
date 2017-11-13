@@ -59,6 +59,7 @@ Depends: ${shlibs:Depends},
  dde-polkit-agent,
  xdotool,
  libpam0g,
+ cgroup-tools,
  deepin-installer-timezones
 Breaks: dde-daemon(<< 2.92.2), dde-workspace
 Conflicts: dde-workspace, lastore-daemon-migration

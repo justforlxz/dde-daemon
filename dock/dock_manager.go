@@ -12,6 +12,7 @@ package dock
 import (
 	libApps "dbus/com/deepin/daemon/apps"
 	"dbus/com/deepin/dde/daemon/launcher"
+	"dbus/com/deepin/sessionmanager"
 	"dbus/com/deepin/wm"
 	"errors"
 	"fmt"
@@ -58,6 +59,7 @@ type DockManager struct {
 	launcher         *launcher.Launcher
 	wm               *wm.Wm
 	launchedRecorder *libApps.LaunchedRecorder
+	startManager     *sessionmanager.StartManager
 
 	// Signals
 	ServiceRestarted func()
@@ -114,7 +116,19 @@ func (m *DockManager) destroy() {
 		m.launchedRecorder = nil
 	}
 
+	if m.startManager != nil {
+		sessionmanager.DestroyStartManager(m.startManager)
+		m.startManager = nil
+	}
+
 	dbus.UnInstallObject(m)
+}
+
+func (m *DockManager) launch(desktopFile string, timestamp uint32, files []string) {
+	err := m.startManager.LaunchApp(desktopFile, timestamp, files)
+	if err != nil {
+		logger.Warningf("launch %q failed: %v", desktopFile, err)
+	}
 }
 
 // ActivateWindow会激活给定id的窗口，被激活的窗口通常会成为焦点窗口。

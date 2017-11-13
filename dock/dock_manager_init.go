@@ -12,6 +12,7 @@ package dock
 import (
 	libApps "dbus/com/deepin/daemon/apps"
 	"dbus/com/deepin/dde/daemon/launcher"
+	"dbus/com/deepin/sessionmanager"
 	"dbus/com/deepin/wm"
 	"gir/gio-2.0"
 	"github.com/BurntSushi/xgb/xproto"
@@ -138,6 +139,11 @@ func (m *DockManager) init() error {
 		return err
 	}
 	m.listenLauncherSignal()
+
+	m.startManager, err = sessionmanager.NewStartManager("com.deepin.SessionManager", "/com/deepin/StartManager")
+	if err != nil {
+		return err
+	}
 
 	err = dbus.InstallOnSession(m)
 	if err != nil {

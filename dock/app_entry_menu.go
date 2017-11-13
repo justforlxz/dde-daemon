@@ -60,11 +60,10 @@ func (entry *AppEntry) getMenuItemDesktopActions() []*MenuItem {
 	launchAction := func(action desktopappinfo.DesktopAction) func(timestamp uint32) {
 		return func(timestamp uint32) {
 			logger.Debugf("launch action %+v", action)
-			ctx := entry.dockManager.launchContext
-			ctx.SetTimestamp(timestamp)
-			action.Launch(nil, ctx)
-
-			entry.dockManager.markAppLaunched(ai)
+			err := entry.dockManager.startManager.LaunchAppAction(ai.GetFileName(), action.Section, timestamp)
+			if err != nil {
+				logger.Warning("launchAppAction failed:", err)
+			}
 		}
 	}
 
@@ -79,12 +78,7 @@ func (entry *AppEntry) launchApp(timestamp uint32) {
 	logger.Debug("launchApp timestamp:", timestamp)
 	if entry.appInfo != nil {
 		logger.Debug("Has AppInfo")
-
-		ctx := entry.dockManager.launchContext
-		ctx.SetTimestamp(timestamp)
-		entry.appInfo.Launch(nil, ctx)
-
-		entry.dockManager.markAppLaunched(entry.appInfo)
+		entry.dockManager.launch(entry.appInfo.GetFileName(), timestamp, nil)
 	} else {
 		// TODO
 		logger.Debug("not supported")
