@@ -21,6 +21,7 @@ import (
 	_ "pkg.deepin.io/dde/daemon/launcher"
 	"pkg.deepin.io/dde/daemon/loader"
 	_ "pkg.deepin.io/dde/daemon/trayicon"
+	_ "pkg.deepin.io/dde/daemon/x_event_monitor"
 	"pkg.deepin.io/lib"
 	"pkg.deepin.io/lib/app"
 	"pkg.deepin.io/lib/dbus"
@@ -104,7 +105,7 @@ func main() {
 		loader.SetLogLevel(appLogLevel)
 	}
 
-	loader.EnableModules([]string{"dock", "launcher", "trayicon"}, nil, loader.EnableFlagIgnoreMissingModule)
+	loader.EnableModules([]string{"dock", "launcher", "trayicon", "x_event_monitor"}, nil, loader.EnableFlagIgnoreMissingModule)
 
 	runMainLoop()
 }
