@@ -110,12 +110,11 @@ func SetFamily(standard, monospace string, size float64) error {
 	if standInfo == nil {
 		return fmt.Errorf("Invalid standard id '%s'", standard)
 	}
-	standard += " " + standInfo.preferredStyle()
+
 	monoInfo := families.Get(monospace)
 	if monoInfo == nil {
 		return fmt.Errorf("Invalid monospace id '%s'", monospace)
 	}
-	monospace += " " + monoInfo.preferredStyle()
 
 	// fc-match can not real time update
 	/*
@@ -248,7 +247,7 @@ func writeFontConfig(content, file string) error {
 //
 //func configContent(standard, mono string, pixel float64) string {
 func configContent(standard, mono string) string {
-	return fmt.Sprintf(`<?xml version="2.0"?>
+	return fmt.Sprintf(`<?xml version="1.0"?>
 <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
 <fontconfig>
     <match target="pattern">
@@ -279,16 +278,6 @@ func configContent(standard, mono string) string {
             <string>%s</string>
             <string>%s</string>
         </edit>
-    </match>
-
-    <match target="font">
-        <edit name="hinting"><bool>true</bool></edit>
-        <edit name="autohint"><bool>false</bool></edit>
-        <edit name="hintstyle"><const>hintfull</const></edit>
-        <edit name="rgba"><const>rgb</const></edit>
-        <edit name="lcdfilter"><const>lcddefault</const></edit>
-        <edit name="embeddedbitmap"><bool>false</bool></edit>
-        <edit name="embolden"><bool>false</bool></edit>
     </match>
 
 </fontconfig>`, standard, fallbackStandard,
