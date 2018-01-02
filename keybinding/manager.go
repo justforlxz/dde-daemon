@@ -10,18 +10,22 @@
 package keybinding
 
 import (
+	"os/exec"
+	"path/filepath"
+	"strings"
+	"time"
+
 	"dbus/com/deepin/daemon/helper/backlight"
 	"dbus/com/deepin/sessionmanager"
+
 	"gir/gio-2.0"
 	"github.com/BurntSushi/xgb/xtest"
 	"github.com/BurntSushi/xgbutil"
-	"path/filepath"
 	"pkg.deepin.io/dde/daemon/keybinding/keybind"
 	"pkg.deepin.io/dde/daemon/keybinding/shortcuts"
 	"pkg.deepin.io/lib/dbus"
 	"pkg.deepin.io/lib/dbus/property"
 	"pkg.deepin.io/lib/xdg/basedir"
-	"time"
 )
 
 const (
@@ -286,6 +290,11 @@ func (m *Manager) execCmd(cmd string) error {
 		logger.Debug("cmd is empty")
 		return nil
 	}
+	if strings.HasPrefix(cmd, "dbus-send") {
+		logger.Debug("run cmd:", cmd)
+		return exec.Command("sh", "-c", cmd).Run()
+	}
+	logger.Debug("startdde run cmd:", cmd)
 
 	return m.startManager.RunCommand("sh", []string{"-c", cmd})
 }
