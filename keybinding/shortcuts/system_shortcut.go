@@ -98,7 +98,7 @@ func findSysActionInTable(id string) string {
 	case "disable-touchpad":
 		return "gsettings set com.deepin.dde.touchpad touchpad-enabled false"
 	case "wm-switcher":
-		return "dbus-send --type=method_call --dest=com.deepin.wm_switcher /com/deepin/wm_switcher com.deepin.wm_switcher.requestSwitchWM"
+		return "dbus-send --type=method_call --dest=com.deepin.WMSwitcher /com/deepin/WMSwitcher com.deepin.WMSwitcher.RequestSwitchWM"
 	}
 
 	return ""
