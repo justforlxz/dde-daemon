@@ -191,5 +191,18 @@
                 "e:chrome.ex"
             ]
         ]
+    },
+    {
+        "ret": "id=apps.com.wechat.web",
+        "rules": [
+            [
+                "wmi",
+                "e:wx2.qq.com"
+            ],
+            [
+                "wmc",
+                "e:google-chrome"
+            ]
+        ]
     }
 ]
