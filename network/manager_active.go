@@ -82,10 +82,9 @@ func (m *Manager) initActiveConnectionManage() {
 	interfaceActive := "org.freedesktop.NetworkManager.Connection.Active"
 	interfaceVpn := "org.freedesktop.NetworkManager.VPN.Connection"
 	memberProperties := "PropertiesChanged"
-	memberStateChanged := "StateChanged"
 	memberVpnState := "VpnStateChanged"
 	m.dbusWatcher.watch("type=signal," + "path=" + pathNm + ",interface=" + interfaceNm + ",member=" + memberProperties)
-	m.dbusWatcher.watch("type=signal,sender=" + senderNm + ",interface=" + interfaceActive + ",member=" + memberStateChanged)
+	m.dbusWatcher.watch("type=signal,sender=" + senderNm + ",interface=" + interfaceActive + ",member=" + memberProperties)
 	m.dbusWatcher.watch("type=signal,sender=" + senderNm + ",interface=" + interfaceVpn + ",member=" + memberVpnState)
 
 	// update active connection properties
@@ -102,8 +101,22 @@ func (m *Manager) initActiveConnectionManage() {
 			return
 		}
 
-		if s.Name == interfaceActive+"."+memberStateChanged && len(s.Body) >= 2 {
-			state, _ := s.Body[0].(uint32)
+		if s.Name == interfaceActive+"."+memberProperties && len(s.Body) == 1 {
+			props, ok := s.Body[0].(map[string]dbus.Variant)
+			if !ok {
+				return
+			}
+
+			stateVar, ok := props["State"]
+			if !ok {
+				return
+			}
+
+			state, ok := stateVar.Value().(uint32)
+			if !ok {
+				return
+			}
+
 			m.doUpdateActiveConnection(s.Path, state)
 		}
 	})
