@@ -395,7 +395,8 @@ func (m *Manager) init() {
 	m.initCurrentBgs()
 	m.imageBlur = accounts.NewImageBlur(systemConn)
 
-	m.syncConfig = dsync.NewConfig(&syncConfig{m: m}, m.sigLoop, dbusPath, logger)
+	m.syncConfig = dsync.NewConfig("appearance", &syncConfig{m: m}, m.sigLoop,
+		dbusPath, logger)
 }
 
 func (m *Manager) correctFontName() {

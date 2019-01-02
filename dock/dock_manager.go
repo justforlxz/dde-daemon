@@ -25,6 +25,8 @@ import (
 	"sync"
 	"time"
 
+	"pkg.deepin.io/dde/daemon/common/dsync"
+
 	// dbus interfaces:
 	libApps "github.com/linuxdeepin/go-dbus-factory/com.deepin.daemon.apps"
 	"github.com/linuxdeepin/go-dbus-factory/com.deepin.dde.daemon.launcher"
@@ -55,6 +57,7 @@ type Manager struct {
 
 	service            *dbusutil.Service
 	sessionSigLoop     *dbusutil.SignalLoop
+	syncConfig         *dsync.Config
 	clientList         windowSlice
 	windowInfoMap      map[x.Window]*WindowInfo
 	windowInfoMapMutex sync.RWMutex
