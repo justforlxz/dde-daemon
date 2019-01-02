@@ -53,7 +53,7 @@ func (d *Daemon) Start() (err error) {
 		return
 	}
 
-	err = service.Export(dbusObjPath, d.manager)
+	err = service.Export(dbusObjPath, d.manager, d.manager.syncConfig)
 	if err != nil {
 		return
 	}
@@ -61,6 +61,11 @@ func (d *Daemon) Start() (err error) {
 	err = service.RequestName(dbusServiceName)
 	if err != nil {
 		return
+	}
+
+	regErr := d.manager.syncConfig.Register()
+	if regErr != nil {
+		logger.Warning(regErr)
 	}
 
 	return
