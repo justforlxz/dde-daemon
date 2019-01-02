@@ -59,7 +59,7 @@ func (*Daemon) Start() error {
 
 	_m = newManager(service)
 	_m.init()
-	err := service.Export(dbusPath, _m)
+	err := service.Export(dbusPath, _m, _m.syncConfig)
 	if err != nil {
 		_m.destroy()
 		return err
@@ -70,6 +70,11 @@ func (*Daemon) Start() error {
 		_m.destroy()
 		service.StopExport(_m)
 		return err
+	}
+
+	err = _m.syncConfig.Register()
+	if err != nil {
+		logger.Warning(err)
 	}
 
 	go _m.listenCursorChanged()

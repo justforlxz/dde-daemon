@@ -29,6 +29,8 @@ import (
 	"sync"
 	"time"
 
+	"pkg.deepin.io/dde/daemon/common/dsync"
+
 	"gir/gio-2.0"
 	"github.com/linuxdeepin/go-dbus-factory/com.deepin.daemon.accounts"
 	"github.com/linuxdeepin/go-dbus-factory/com.deepin.sessionmanager"
@@ -89,8 +91,9 @@ const (
 // Manager shows current themes and fonts settings, emit 'Changed' signal if modified
 // if themes list changed will emit 'Refreshed' signal
 type Manager struct {
-	service *dbusutil.Service
-	sigLoop *dbusutil.SignalLoop
+	service    *dbusutil.Service
+	sigLoop    *dbusutil.SignalLoop
+	syncConfig *dsync.Config
 
 	GtkTheme      gsprop.String
 	IconTheme     gsprop.String
@@ -175,7 +178,7 @@ func newManager(service *dbusutil.Service) *Manager {
 }
 
 func (m *Manager) initCurrentBgs() {
-	m.currentDesktopBgs = m.setting.GetStrv(gsKeyBackgroundURIs)
+	m.currentDesktopBgs = m.getBackgroundURIs()
 
 	if m.userObj == nil {
 		return
@@ -186,6 +189,10 @@ func (m *Manager) initCurrentBgs() {
 	} else {
 		logger.Warning(err)
 	}
+}
+
+func (m *Manager) getBackgroundURIs() []string {
+	return m.setting.GetStrv(gsKeyBackgroundURIs)
 }
 
 func (m *Manager) isBgInUse(file string) bool {
@@ -224,6 +231,7 @@ func (m *Manager) listBackground() background.Backgrounds {
 func (m *Manager) destroy() {
 	m.sigLoop.Stop()
 	m.xSettings.RemoveHandler(proxy.RemoveAllHandlers)
+	m.syncConfig.Destroy()
 
 	if m.setting != nil {
 		m.setting.Unref()
@@ -386,6 +394,8 @@ func (m *Manager) init() {
 	m.initUserObj(systemConn)
 	m.initCurrentBgs()
 	m.imageBlur = accounts.NewImageBlur(systemConn)
+
+	m.syncConfig = dsync.NewConfig(&syncConfig{m: m}, m.sigLoop, dbusPath, logger)
 }
 
 func (m *Manager) correctFontName() {
@@ -498,7 +508,7 @@ func (m *Manager) doSetStandardFont(value string) error {
 	return m.writeDQtTheme(dQtKeyFont, value)
 }
 
-func (m *Manager) doSetMonnospaceFont(value string) error {
+func (m *Manager) doSetMonospaceFont(value string) error {
 	if !fonts.IsFontFamily(value) {
 		return fmt.Errorf("invalid font family '%v'", value)
 	}
