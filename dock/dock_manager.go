@@ -20,6 +20,7 @@
 package dock
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"sync"
@@ -97,6 +98,10 @@ type Manager struct {
 		EntryRemoved struct {
 			entryId string
 		}
+
+		PluginSettingsUpdated struct {
+			ts int64
+		}
 	}
 
 	methods *struct {
@@ -116,6 +121,8 @@ type Manager struct {
 		IsOnDock                  func() `in:"desktopFile" out:"value"`
 		QueryWindowIdentifyMethod func() `in:"win" out:"identifyMethod"`
 		GetDockedAppsDesktopFiles func() `out:"desktopFiles"`
+		SetPluginSettings         func() `in:"ts,jsonStr"`
+		GetPluginSettings         func() `out:"jsonStr"`
 	}
 }
 
@@ -129,6 +136,7 @@ const (
 	settingKeyShowTimeout          = "show-timeout"
 	settingKeyHideTimeout          = "hide-timeout"
 	settingKeyWinIconPreferredApps = "win-icon-preferred-apps"
+	settingKeyPluginSettings       = "plugin-settings"
 
 	frontendWindowWmClass = "dde-dock"
 
@@ -300,12 +308,12 @@ func (m *Manager) IsDocked(desktopFile string) (bool, *dbus.Error) {
 	return entry != nil, nil
 }
 
-func (m *Manager) RequestDock(desktopFile string, index int32) (bool, *dbus.Error) {
-	logger.Debug("RequestDock", desktopFile, index)
+func (m *Manager) requestDock(desktopFile string, index int32) (bool, error) {
+	logger.Debug("requestDock", desktopFile, index)
 	desktopFile = toLocalPath(desktopFile)
 	appInfo := NewAppInfoFromFile(desktopFile)
 	if appInfo == nil {
-		return false, dbusutil.ToError(errors.New("invalid desktopFilePath"))
+		return false, errors.New("invalid desktopFilePath")
 	}
 	var newlyCreated bool
 	entry := m.Entries.GetByInnerId(appInfo.innerId)
@@ -316,13 +324,13 @@ func (m *Manager) RequestDock(desktopFile string, index int32) (bool, *dbus.Erro
 
 	docked, err := m.dockEntry(entry)
 	if err != nil {
-		return false, dbusutil.ToError(err)
+		return false, err
 	}
 
 	if newlyCreated {
 		err := m.exportAppEntry(entry)
 		if err != nil {
-			return false, dbusutil.ToError(err)
+			return false, err
 		}
 		m.Entries.Insert(entry, int(index))
 	}
@@ -334,11 +342,21 @@ func (m *Manager) RequestDock(desktopFile string, index int32) (bool, *dbus.Erro
 	return docked, nil
 }
 
+func (m *Manager) RequestDock(desktopFile string, index int32) (bool, *dbus.Error) {
+	docked, err := m.requestDock(desktopFile, index)
+	return docked, dbusutil.ToError(err)
+}
+
 func (m *Manager) RequestUndock(desktopFile string) (bool, *dbus.Error) {
+	undocked, err := m.requestUndock(desktopFile)
+	return undocked, dbusutil.ToError(err)
+}
+
+func (m *Manager) requestUndock(desktopFile string) (bool, error) {
 	desktopFile = toLocalPath(desktopFile)
 	entry, err := m.getDockedAppEntryByDesktopFilePath(desktopFile)
 	if err != nil {
-		return false, dbusutil.ToError(err)
+		return false, err
 	}
 	if entry == nil {
 		return false, nil
@@ -392,4 +410,40 @@ func (m *Manager) GetDockedAppsDesktopFiles() ([]string, *dbus.Error) {
 		}
 	}
 	return result, nil
+}
+
+func (m *Manager) GetPluginSettings() (string, *dbus.Error) {
+	jsonStr := m.settings.GetString(settingKeyPluginSettings)
+	var v pluginSettings
+	err := json.Unmarshal([]byte(jsonStr), &v)
+	if err != nil {
+		return "", dbusutil.ToError(err)
+	}
+	return jsonStr, nil
+}
+
+func (m *Manager) SetPluginSettings(ts int64, jsonStr string) *dbus.Error {
+	if ts == 0 {
+		ts = time.Now().UnixNano()
+	}
+
+	var v pluginSettings
+	err := json.Unmarshal([]byte(jsonStr), &v)
+	if err != nil {
+		return dbusutil.ToError(err)
+	}
+
+	ok := m.settings.SetString(settingKeyPluginSettings, jsonStr)
+	if !ok {
+		err = errors.New("failed to save plugin settings")
+		logger.Warning(err)
+		return dbusutil.ToError(err)
+	}
+
+	err = m.service.Emit(m, "PluginSettingsUpdated", ts)
+	if err != nil {
+		logger.Warning(err)
+	}
+
+	return nil
 }
