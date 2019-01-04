@@ -25,6 +25,7 @@ import (
 
 	nmdbus "github.com/linuxdeepin/go-dbus-factory/org.freedesktop.networkmanager"
 	"github.com/linuxdeepin/go-dbus-factory/org.freedesktop.secrets"
+	"pkg.deepin.io/dde/daemon/common/dsync"
 	"pkg.deepin.io/dde/daemon/network/proxychains"
 	"pkg.deepin.io/lib/dbus1"
 	"pkg.deepin.io/lib/dbusutil"
@@ -85,6 +86,9 @@ type Manager struct {
 	switchHandler *switchHandler
 
 	proxyChainsManager *proxychains.Manager
+
+	sessionSigLoop *dbusutil.SignalLoop
+	syncConfig     *dsync.Config
 
 	signals *struct {
 		AccessPointAdded, AccessPointRemoved, AccessPointPropertiesChanged struct {
@@ -226,6 +230,11 @@ func (m *Manager) init() {
 			m.RequestWirelessScan()
 		}
 	})
+
+	m.sessionSigLoop = dbusutil.NewSignalLoop(m.service.Conn(), 10)
+	m.sessionSigLoop.Start()
+	m.syncConfig = dsync.NewConfig("network", &syncConfig{m: m},
+		m.sessionSigLoop, dbusPath, logger)
 }
 
 func (m *Manager) destroy() {

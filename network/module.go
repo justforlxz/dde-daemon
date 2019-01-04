@@ -71,7 +71,8 @@ func (d *Module) Start() error {
 	managerServerObj.SetWriteCallback(manager, "NetworkingEnabled", manager.networkingEnabledWriteCb)
 	managerServerObj.SetWriteCallback(manager, "VpnEnabled", manager.vpnEnabledWriteCb)
 
-	err = managerServerObj.Export()
+	// err = managerServerObj.Export()
+	err = service.Export(dbusPath, manager, manager.syncConfig)
 	if err != nil {
 		logger.Error("failed to export manager:", err)
 		manager = nil
