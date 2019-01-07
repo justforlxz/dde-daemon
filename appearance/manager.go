@@ -119,8 +119,8 @@ type Manager struct {
 	watcher    *fsnotify.Watcher
 	endWatcher chan struct{}
 
-	currentDesktopBgs []string
-	currentGreeterBg  string
+	desktopBgs []string
+	greeterBg  string
 
 	wm *wm.Wm
 
@@ -178,14 +178,14 @@ func newManager(service *dbusutil.Service) *Manager {
 }
 
 func (m *Manager) initCurrentBgs() {
-	m.currentDesktopBgs = m.getBackgroundURIs()
+	m.desktopBgs = m.getBackgroundURIs()
 
 	if m.userObj == nil {
 		return
 	}
 	greeterBg, err := m.userObj.GreeterBackground().Get(0)
 	if err == nil {
-		m.currentGreeterBg = greeterBg
+		m.greeterBg = greeterBg
 	} else {
 		logger.Warning(err)
 	}
@@ -196,11 +196,11 @@ func (m *Manager) getBackgroundURIs() []string {
 }
 
 func (m *Manager) isBgInUse(file string) bool {
-	if file == m.currentGreeterBg {
+	if file == m.greeterBg {
 		return true
 	}
 
-	for _, bg := range m.currentDesktopBgs {
+	for _, bg := range m.desktopBgs {
 		if bg == file {
 			return true
 		}
@@ -490,6 +490,8 @@ func (m *Manager) doSetBackground(value string) error {
 }
 
 func (m *Manager) doSetGreeterBackground(value string) error {
+	value = dutils.EncodeURI(value, dutils.SCHEME_FILE)
+	m.greeterBg = value
 	if m.userObj == nil {
 		return errors.New("user object is nil")
 	}
