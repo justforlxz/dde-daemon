@@ -203,6 +203,7 @@ func (m *Manager) init() error {
 
 	m.registerIdentifyWindowFuncs()
 	m.initEntries()
+	m.pluginSettings = newPluginSettingsStorage(m)
 
 	m.syncConfig = dsync.NewConfig("dock", &syncConfig{m: m}, m.sessionSigLoop,
 		dbusPath, logger)
