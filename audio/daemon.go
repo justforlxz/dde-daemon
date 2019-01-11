@@ -62,7 +62,7 @@ func (d *Daemon) Start() error {
 
 	d.audio = newAudio(ctx, service)
 
-	err := service.Export(dbusPath, d.audio)
+	err := service.Export(dbusPath, d.audio, d.audio.syncConfig)
 	if err != nil {
 		return err
 	}
@@ -74,6 +74,11 @@ func (d *Daemon) Start() error {
 	go d.audio.handleEvent()
 	go d.audio.handleStateChanged()
 	initDefaultVolume(d.audio)
+
+	err = d.audio.syncConfig.Register()
+	if err != nil {
+		logger.Warning("Failed to register sync bus:", err)
+	}
 	return nil
 }
 

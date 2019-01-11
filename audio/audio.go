@@ -24,6 +24,7 @@ import (
 	"sync"
 
 	"gir/gio-2.0"
+	"pkg.deepin.io/dde/daemon/common/dsync"
 	"pkg.deepin.io/lib/dbus1"
 	"pkg.deepin.io/lib/dbusutil"
 	"pkg.deepin.io/lib/pulse"
@@ -99,6 +100,9 @@ type Audio struct {
 
 	portLocker sync.Mutex
 
+	syncConfig     *dsync.Config
+	sessionSigLoop *dbusutil.SignalLoop
+
 	methods *struct {
 		SetPort func() `in:"cardId,portName,direction"`
 	}
@@ -118,6 +122,11 @@ func newAudio(ctx *pulse.Context, service *dbusutil.Service) *Audio {
 	a.applyConfig()
 	a.fixActivePortNotAvailable()
 	a.init()
+
+	a.sessionSigLoop = dbusutil.NewSignalLoop(service.Conn(), 10)
+	a.syncConfig = dsync.NewConfig("audio", &syncConfig{a: a},
+		a.sessionSigLoop, dbusPath, logger)
+	a.sessionSigLoop.Start()
 	return a
 }
 
