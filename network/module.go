@@ -96,6 +96,11 @@ func (d *Module) Start() error {
 		initDBusDaemon()
 		watchNetworkManagerRestart(manager)
 	}()
+
+	err = manager.syncConfig.Register()
+	if err != nil {
+		logger.Warning("Failed to register sync service:", err)
+	}
 	return nil
 }
 
