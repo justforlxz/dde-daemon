@@ -123,6 +123,7 @@ type Manager struct {
 		SetPluginSettings         func() `in:"jsonStr"`
 		GetPluginSettings         func() `out:"jsonStr"`
 		MergePluginSettings       func() `in:"jsonStr"`
+		RemovePluginSettings      func() `in:"key1,key2List"`
 	}
 }
 
@@ -438,5 +439,10 @@ func (m *Manager) MergePluginSettings(jsonStr string) *dbus.Error {
 	}
 
 	m.pluginSettings.merge(v)
+	return nil
+}
+
+func (m *Manager) RemovePluginSettings(key1 string, key2List []string) *dbus.Error {
+	m.pluginSettings.remove(key1, key2List)
 	return nil
 }
