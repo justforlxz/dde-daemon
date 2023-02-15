@@ -1,0 +1,10 @@
+name: Call aur sync
+on:
+  push:
+    paths:
+      - archlinux/PKGBUILD
+
+jobs:
+  check_job:
+    uses: justforlxz/github/.github/workflows/aur-sync.yml@master
+    secrets: inherit
